@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Loader</title>
+  <link rel="icon" type="image/webp" href="data:image/webp;base64,UklGRlAEAABXRUJQVlA4IEQEAACwIACdASq1AJQAPmEukkYkIqGhLBKJEIAMCU3ZbAE5GxXmsHEAy4nsXBP5D9xvob/4fiAdZnzAebP/pf2M9ze8oegB/AP856bXs65EldB74XV7F+/Aaq2EZzg5QyVP5scrocFLbn33ouDex/VTDl8QEG7ZlNBAjuOmJ7sg80e5S0Ntvbe5mRfW6wbeHWrzMzjfOAFN2T8B7XocScXK14ONFqPoslql27WLlZ6YRvpDYvx3ayBesLrSd/w29Tu/WBO7rw3jpcGE9XYbFjnFeqb+jd9hTlJ74UE8TSO488LerT10Y1aPplqV8eSe5+9Mck2NqlKQuWH1gEr0Bdr2tbdByrd1+Wz69Mbt52kFnMAA/vz0RmSrXUEOuB0cM0CUnvfNXERM/+O1benrv2O7ElPIeBBSXvkc8t7Gl02nTMvghJGtlSS9WKnMvPfymY/FnXtxNT5xy9HBevOypkBjqJQEXl/YDKNFUcX6f7HP5uWvY+hSZRaWMO8517zm3+eIyd4rT4gRGJs2M+OetWita4gtwQJwTwPCxwihmY8Xudfi5I1YG00rZiM9kIx2qyd34oBV/E4ULJEWC3bZ6Y3mpMhb6LlxZ9+3zZuheDK8skB8rlm6LyA1fb3zHvLF6n9TVaAmKJA+Ty+lPI3//7TbP8FULEh0Xw9aUszGIl4U/inV7ttzhITp8LbpILvFF5eM9Mw+5eGQ+VPwBp6vPGc34jLVuS4ZLfrt2c+z8ZQjFcObJifKZGJvaP/+Joi+Z+MANVrqsxXjr/3QS44UmQah9AqEndTFJj1IjyjmRMTx2R3YvkhM3flXSpU7ZstyL9mxzNejGRlO8epwQ9aj0McZBKS7YSC6H3daRV1QqLXKH7ODI60cU8c7g+9/h5Z0nsZ6znnb/1sEvMXLIBkISh3rSx1ZfzkYfFtxE2HKh1678Ofgo9Y0/U72+52UD5J/vgfotuzx3UtNb1zcjL6Zz7wnrW5v2YPboj2VD/+PH/+MyKm//8b0lAznUpd6/2bng00Cs414cb59+h+PJv2vn7e/B+PJdHjIMzUgkoB8SuNh0vlNDsPPVIcg5MW0E53Eqxrod051idYlTDL83rpKpARXhAlt5ey7U3VLU88DnsyF2q6Qy16xsq9zy4W12UION9kgTo0iZD9qSRYkfULyySSj/uCOd/6Kk5rG29ASNMUGxj4kH7hkIN8cjF8Rji93MakMEp0i+MKiXInyNzwCAAnxvR/Ek5OBJ5biDU91a+xyb75yspdNhmG3ourPD57ef149n/iil19n7IzdcLb4mRbpTHdv2j5SlJZOAXnZd4U+PMMNqsNQCD+K5SL0Z9T3g18umQdLoKqsUBWJtWdLId271S3KhJcDWMghWVr3cm8afcw+7i3XPerqcHui7NJM7OwDC7mqEIlL0VaTnFBFpwQe5Yn90iXpWa9CAwcMFGt8+SAAAAAAAAA=">
+  <style>
+    body {
+      color: #eee;
+      background: #0f1117;
+      font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
+    }
+
+    input[type="file"] {
+      background: #141821;
+      color: #fff;
+      border: 1px solid #444;
+    }
+
+    button {
+      background: #1f2430;
+      color: #f5f5f5;
+      border: 1px solid #3a4154;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2b3346;
+    }
+
+    label,
+    a,
+    h3,
+    strong {
+      color: #ddd;
+    }
+
+    #blobURLDisplay,
+    .display,
+    #loadTargets,
+    pre,
+    iframe,
+    object {
+      background: #181c26;
+      color: #f4f4f4;
+      border: 1px solid #373f56;
+    }
+
+    #blobURLDisplay {
+      margin: 20px;
+      white-space: pre-wrap;
+      padding: 10px;
+      min-height: 58px;
+    }
+
+    #openFileBtn {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="dropOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 17, 23, 0.9); z-index:9999; color:#ddd; font-size:2em; justify-content:center; align-items:center; border: 4px dashed #3a4154; box-sizing: border-box;">
+  Drop file here!
+</div>
+  <div style="margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+    <input id="fileInput" type="file" accept="text/html,text/plain" />
+    <input id="urlInput" type="text" placeholder="Enter remote file URL..." />
+    <button onclick="fetchRemoteURL()">Load from URL</button>
+  </div>
+
+  <div style="margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+    <button onclick="displayBlobURL()" title="SPEED: MAXIMUM. This is the best known (to me) meathod for opening a file. Fast, and can be reloaded without losing page content.">Open as blob link</button>
+    <button onclick="generateDataURL()" title="SPEED: HOPES AND DREAMS. This is laggy. Don't do it for ANY files over 15KB.">Open as text link</button>
+    <button onclick="openFileInNewTab()" title="SPEED: MEDIUM. This is mid. It basically is just the previous option but better because the browser doesnt have to render all that text. Reloading destroys page content.">Open in blank page</button>
+    <button onclick="loadIntoIframe()" title="SPEED: FAST. It basically just loads the content through a javascript function onto a box. Dorsn't open a new tab.">Load into box</button>
+    <button onclick="loadIntoObject()" title="SPEED: MAXIMUM. Exactly ties with Open as blob link because it does just that, except it doesn't open a new tab and just loads onto the box.">&lt;object&gt;</button>
+    <button onclick="loadDirectly()" title="SPEED: N/A. This option loads the file directly into the page. That's it. It doesn't render the content as HTML, though... try it and find out :>">Load into page</button>
+    <button onclick="revokeObjectURL()" title="SPEED: N/A. This just stops any Blobs you have from working. Saves memory. This is automatically called when the page is exited, so you dont need to do this every time.">Revoke Blob:URL</button>
+    <button onclick="toggleFullscreen()" title="pretty self explanitory. fullscreens the page you're (probobly if its not glitching) looking at now.">Fullscreen</button>
+    <button onclick="openWithFileSystemAccess()" title="SPEED: N/A. This gives the page access to edit files and uses that to load the files slightly faster if it's over like 200MB. The normal loading is definitely faster and less glitchy for files under ~75MB though.">File System Access API</button>
+    <button onclick="previewContentAware();" title="I failed to make this into a toggle because it kept loading onto the page AND opening a new tab. Basically shows the file based on what type it is, PDF, RTF, TXT, MP4, etc.">Weird file types button</button>
+    <button onclick="clearPage()" title="you don't need to do this every time you close the tab. only use this to select a file with the same name as the file you just selected because that doesnt update the /if filename changed changed\ function and i couldnt be bothered to fix it.">Clear page</button>
+  </div>
+
+  <div id="toggles" style="margin: 12px 0; color:#ccc; font-size:0.95em; display:flex; flex-wrap: wrap; align-items:center; gap:16px;">
+    <strong style="font-size:0.95em; color:#bbb;">Toggles:</strong>
+    <label style="display:flex; align-items:center; gap:6px;">
+      <input id="openNewTabToggle" type="checkbox" checked>Open URL in new tab
+    </label>
+    <label style="display:flex; align-items:center; gap:6px;">
+      <input id="copyURLToggle" type="checkbox">Copy URL to clipboard
+    </label>
+    <label style="display:flex; align-items:center; gap:6px;">
+      <input id="showMetadataToggle" type="checkbox">Show file metadata
+    </label>
+    <label style="display:flex; align-items:center; gap:6px;">
+  <input id="contentAwareToggle" type="checkbox">Auto-preview (Content Aware)
+    </label>
+  </div>
+  <div id="blobURLDisplay" class="display">Output will appear here.</div>
+  <div id="metadataPanel" class="display" style="margin: 0 20px 20px 20px; padding: 12px; display:none; min-height: 80px;"></div>
+
+  <div id="loadTargets" style="margin: 20px 0; padding: 16px; background:#181c26; border:1px solid #373f56; min-height:260px;">
+    <iframe id="fileIframe" style="width:100%; min-height:220px; border:none; background:transparent; display:none;"></iframe>
+    <object id="fileObject" type="text/html" style="width:100%; min-height:220px; border:none; background:transparent; display:none;"></object>
+    <img id="imagePreview" style="width:100%; max-height:620px; object-fit:contain; display:none; border:none; background:transparent;" alt="Image preview" />
+    <pre id="pageOutput" style="white-space: pre-wrap; border:none; padding:0; min-height:220px; overflow:auto; background:transparent; display:none; margin:0;"></pre>
+  </div>
+  <div id="bottom">
+    <button onclick="downloadPage()">Download Webpage</button>
+    <button onclick="copyPageURL()">Copy Data:URL</button>
+    <button onclick="copyPageCode()">Copy Raw HTML</button>
+  </div>
+  <a>Hover over buttons for more info.</a>
+  <a>This work is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"></a>
+  <script>
+    let currentFileContent = '';
+    let currentFile = null;
+    let objectBlobURL = null;
+
+    const fileInput = document.getElementById('fileInput');
+    const urlInput = document.getElementById('urlInput');
+    const output = document.getElementById('blobURLDisplay');
+    const metadataPanel = document.getElementById('metadataPanel');
+    const fileIframe = document.getElementById('fileIframe');
+    const fileObject = document.getElementById('fileObject');
+    const imagePreview = document.getElementById('imagePreview');
+    const pageOutput = document.getElementById('pageOutput');
+    const openNewTabToggle = document.getElementById('openNewTabToggle');
+    const copyURLToggle = document.getElementById('copyURLToggle');
+    const showMetadataToggle = document.getElementById('showMetadataToggle');
+    const previewToggle = document.getElementById('previewToggle');
+    const contentAwareToggle = document.getElementById('contentAwareToggle');
+
+    // A single function to handle the file, no matter how it was uploaded
+function processFile(file) {
+  if (!file) {
+    output.textContent = 'No file selected.';
+    currentFileContent = '';
+    currentFile = null;
+    return;
+  }
+
+  currentFile = file;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentFileContent = e.target.result;
+    output.textContent = `Loaded file: ${file.name} (${file.type || 'unknown type'})`;
+    updateMetadataPanel();
+    
+    // Automatically preview if the toggle is checked
+    if (typeof contentAwareToggle !== 'undefined' && contentAwareToggle.checked) {
+      previewContentAware();
+    }
+  };
+  document.title = file ? `Loader - ${file.name}` : 'Loader';
+  reader.readAsText(file);
+}
+
+// Update the manual file input to use the new function
+fileInput.addEventListener('change', (event) => {
+  processFile(event.target.files[0]);
+});
+
+    async function fetchRemoteURL() {
+      const url = urlInput.value.trim();
+      if (!url) {
+        alert('Please enter a URL.');
+        return;
+      }
+
+      try {
+        output.textContent = 'Fetching file from URL...';
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const urlParts = new URL(url);
+        const fileName = urlParts.pathname.split('/').pop() || 'remote-file';
+        const fileType = blob.type || 'application/octet-stream';
+
+        currentFile = {
+          name: fileName,
+          type: fileType,
+          size: blob.size,
+          lastModified: Date.now()
+        };
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentFileContent = e.target.result;
+          output.textContent = `Loaded: ${fileName} (${fileType})`;
+          updateMetadataPanel();
+        };
+        reader.onerror = function() {
+          output.textContent = 'Error reading file content.';
+        };
+        reader.readAsText(blob);
+      } catch (err) {
+        output.textContent = `Fetch failed: ${err.message}`;
+        console.error('Fetch error:', err);
+      }
+    }
+const dropOverlay = document.getElementById('dropOverlay');
+
+// Show the overlay when a file is dragged over the window
+window.addEventListener('dragover', (e) => {
+  e.preventDefault(); // Required to allow dropping
+  dropOverlay.style.display = 'flex';
+});
+
+// Hide the overlay if the user drags the file away
+window.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  // Ensure we are leaving the actual window, not just hovering over an element inside it
+  if (e.relatedTarget === null) {
+    dropOverlay.style.display = 'none';
+  }
+});
+
+// Handle the actual drop
+window.addEventListener('drop', (e) => {
+  e.preventDefault(); // Stop the browser from opening the file by default
+  dropOverlay.style.display = 'none';
+
+  // Grab the files from the drop event
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    processFile(e.dataTransfer.files[0]);
+  }
+});
+    async function displayBlobURL() {
+      if (!currentFile) {
+        fileInput.click();
+        return;
+      }
+
+      revokeObjectURL();
+      const blobURL = URL.createObjectURL(currentFile);
+      objectBlobURL = blobURL;
+      console.log('Generated Blob URL:', blobURL);
+      await handleGeneratedURL(blobURL);
+      openURLInNewTabIfEnabled(blobURL);
+    }
+
+    async function generateDataURL() {
+      if (!currentFile) {
+        fileInput.click();
+        return;
+      }
+if (currentFile.size > 50000 && !confirm("This file is over 50KB and might lag or crash your browser. Continue?")) {
+    return;
+  }
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const dataURL = e.target.result;
+        console.log('Generated Data URL:', dataURL);
+        await handleGeneratedURL(dataURL);
+        openURLInNewTabIfEnabled(dataURL);
+      };
+      reader.readAsDataURL(currentFile);
+    }
+
+    async function handleGeneratedURL(url) {
+      if (copyURLToggle.checked) {
+        await copyTextToClipboard(url);
+        output.textContent = 'URL copied to clipboard.';
+      } else {
+        output.textContent = url;
+      }
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return;
+        } catch (err) {
+          console.warn('Clipboard write failed:', err);
+        }
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.warn('Fallback copy command failed:', err);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function updateMetadataPanel() {
+      if (!currentFile || !showMetadataToggle.checked) {
+        metadataPanel.style.display = 'none';
+        metadataPanel.textContent = '';
+        return;
+      }
+
+      const rows = [
+        ['Name', currentFile.name],
+        ['Type', currentFile.type || 'unknown'],
+        ['Size', `${currentFile.size} bytes`],
+        ['Last modified', currentFile.lastModified ? new Date(currentFile.lastModified).toLocaleString() : 'unknown']
+      ];
+
+      metadataPanel.innerHTML = rows.map(([label, value]) => `<div><strong>${label}:</strong> ${value}</div>`).join('');
+      metadataPanel.style.display = 'block';
+    }
+
+    showMetadataToggle.addEventListener('change', updateMetadataPanel);
+    window.addEventListener('keydown', (e) => {
+  //Backtick (`) key to clear page
+  if (e.key === '`') {
+    clearPage();
+  }
+
+  // Tilde (~) to close the page
+  if (e.key === '~') {
+    output.textContent = 'This doesnt work if the user opened the page. IDK how it works but if you pasted the URL into your browser then it doesnt work.';
+    window.close();
+  }
+});
+
+    function openURLInNewTabIfEnabled(url) {
+      if (!openNewTabToggle.checked) {
+        return;
+      }
+
+      const newTab = window.open(url, '_blank');
+      if (!newTab) {
+        alert('Popup blocked! Please allow popups for this site.');
+      }
+    }
+
+    function openFileInNewTab() {
+      if (!currentFileContent) {
+        fileInput.click();
+        return;
+      }
+
+      const newTab = window.open('about:blank');
+      if (newTab) {
+        newTab.document.open();
+        newTab.document.write(currentFileContent);
+        newTab.document.close();
+      } else {
+        alert('Popup blocked! Please allow popups for this site.');
+      }
+    }
+
+    function hideAllLoadTargets() {
+      fileIframe.style.display = 'none';
+      fileObject.style.display = 'none';
+      imagePreview.style.display = 'none';
+      pageOutput.style.display = 'none';
+    }
+
+    function previewContentAware() {
+      if (!currentFile) {
+        return;
+      }
+
+      const type = currentFile.type || '';
+      const name = currentFile.name.toLowerCase();
+
+      if (type.startsWith('image/')) {
+        previewImage();
+        return;
+      }
+
+      if (type === 'application/pdf' || name.endsWith('.pdf')) {
+        previewObject();
+        return;
+      }
+
+      if (type === 'text/html' || name.endsWith('.html') || name.endsWith('.htm')) {
+        previewHTML();
+        return;
+      }
+
+      if (type.startsWith('text/') || type === 'application/json' || type === 'application/xml' || name.endsWith('.txt')) {
+        previewText();
+        return;
+      }
+
+      previewObject();
+    }
+
+    function previewImage() {
+      hideAllLoadTargets();
+      const blobURL = URL.createObjectURL(currentFile);
+      objectBlobURL = blobURL;
+      imagePreview.src = blobURL;
+      imagePreview.style.display = 'block';
+      output.textContent = 'Previewing image file.';
+    }
+
+    function previewObject() {
+      if (!currentFile) {
+        fileInput.click();
+        return;
+      }
+      hideAllLoadTargets();
+      revokeObjectURL();
+      const blobURL = URL.createObjectURL(currentFile);
+      objectBlobURL = blobURL;
+      fileObject.data = blobURL;
+      fileObject.style.display = 'block';
+      output.textContent = 'Previewing file via object/embed.';
+    }
+
+    function previewHTML() {
+      if (!currentFileContent) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentFileContent = e.target.result;
+          previewHTML();
+        };
+        reader.readAsText(currentFile);
+        return;
+      }
+      hideAllLoadTargets();
+      fileIframe.srcdoc = currentFileContent;
+      fileIframe.style.display = 'block';
+      output.textContent = 'Previewing HTML content.';
+    }
+
+    function previewText() {
+      if (!currentFileContent) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentFileContent = e.target.result;
+          previewText();
+        };
+        reader.readAsText(currentFile);
+        return;
+      }
+      hideAllLoadTargets();
+      pageOutput.textContent = currentFileContent;
+      pageOutput.style.display = 'block';
+      output.textContent = 'Previewing text content.';
+    }
+
+    function loadIntoIframe() {
+      if (!currentFileContent) {
+        alert('Select a file and wait for it to load first.');
+        return;
+      }
+      hideAllLoadTargets();
+      fileIframe.srcdoc = currentFileContent;
+      fileIframe.style.display = 'block';
+      output.textContent = 'Loaded into iframe.srcdoc';
+    }
+
+    function loadIntoObject() {
+      if (!currentFile) {
+        alert('Select a file first.');
+        return;
+      }
+      revokeObjectURL();
+      const blobURL = URL.createObjectURL(currentFile);
+      objectBlobURL = blobURL;
+      fileObject.data = blobURL;
+      hideAllLoadTargets();
+      fileObject.style.display = 'block';
+      output.textContent = 'Loaded into <object> using blob URL';
+    }
+
+    function loadDirectly() {
+      if (!currentFileContent) {
+        alert('Select a file and wait for it to load first.');
+        return;
+      }
+      hideAllLoadTargets();
+      pageOutput.textContent = currentFileContent;
+      pageOutput.style.display = 'block';
+      output.textContent = 'File content loaded directly into the page.';
+    }
+
+    function clearPage() {
+      currentFile = null;
+      currentFileContent = '';
+      revokeObjectURL();
+      fileInput.value = '';
+      output.textContent = 'Page cleared.';
+      hideAllLoadTargets();
+      fileIframe.srcdoc = '';
+      fileObject.data = '';
+      pageOutput.textContent = '';
+      metadataPanel.style.display = 'none';
+      metadataPanel.textContent = '';
+    }
+
+    async function openWithFileSystemAccess() {
+      if (!window.showOpenFilePicker) {
+        alert('File System Access API is not supported in this browser.');
+        return;
+      }
+
+      try {
+        const [handle] = await window.showOpenFilePicker({ types: [{ description: 'Text or HTML files', accept: { 'text/*': ['.txt', '.html', '.htm'] } }] });
+        const file = await handle.getFile();
+        currentFile = file;
+        const text = await file.text();
+        currentFileContent = text;
+        output.textContent = `File System Access loaded: ${file.name}`;
+        pageOutput.textContent = text;
+        updateMetadataPanel();
+      } catch (err) {
+        console.warn('File System Access cancelled or failed:', err);
+        if (err.name !== 'AbortError') {
+          output.textContent = 'File System Access failed: ' + err.message;
+        }
+      }
+    }
+
+    function revokeObjectURL() {
+      if (objectBlobURL) {
+        URL.revokeObjectURL(objectBlobURL);
+        objectBlobURL = null;
+      }
+    }
+
+    function toggleFullscreen() {
+      const loadTargets = document.getElementById('loadTargets');
+      if (!document.fullscreenElement) {
+        loadTargets.requestFullscreen().catch(err => {
+          console.error('Fullscreen request failed:', err);
+          alert('Fullscreen not supported or denied.');
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    function downloadPage() {
+  const blob = new Blob(["<!DOCTYPE html>\n" + document.documentElement.outerHTML.trim()], { type: 'text/html' });  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'loader.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+    function copyPageURL() {
+    const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML.trim();
+    const base64Html = btoa(html);
+    const dataUri = `data:text/html;base64,${base64Html}`;
+    
+    navigator.clipboard.writeText(dataUri).then(() => {
+        alert("Data:URL copied to clipboard! A few extra line breaks are added btw because idk why.");
+    }).catch(err => {
+        console.error("Error copying text: ", err);
+    });
+}
+    function copyPageCode() {
+    const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML.trim();
+    navigator.clipboard.writeText(html).then(() => {
+        alert("Raw HTML copied to clipboard! A few extra line breaks are added btw because idk why.");
+    }).catch(err => {
+        console.error("Error copying text: ", err);
+    });
+}
+    window.addEventListener('beforeunload', revokeObjectURL);
+  </script>
+  <!--
+made by evilsigmud
+
+    This work is licensed under CC BY-SA 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-sa/4.0/
+
+i am new plz dont roast
+TODO
+Add CORS proxy for fetching a remote file URL
+Add more meathods for opening the document if they exist which they probobly don't
+WHY does "download webpage" make extra line breaks at the bottom? I included ".trim" in outer HTML!
+-->
+</body>
+</html>
